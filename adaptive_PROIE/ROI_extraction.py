@@ -127,12 +127,13 @@ def process_single_img_ipt(save_dir_visualize,save_dir_square,root_dir,imgn):
 
 
 if __name__ == '__main__':
-    root_dir = r"/tmp/NTUv2detection/Theta_predict/Datas/HIT"#
-    save_dir_visualize = "Datas/ROIS/MPD/visualize"
-    save_dir_square = "Datas/ROIS/HIT"
-    mask_save_dir = "Datas/ROIS/HIT/visualize_mask"
+    root_dir        = "/home/pai-ng/Jamal/MPDv2"  # output of Stage 1
+    save_dir_visualize = "MPDv2_vis/"
+    save_dir_square    = "/home/pai-ng/Jamal/MPDv2_ROI_FFARD"
+    os.makedirs(save_dir_visualize, exist_ok=True)
+    os.makedirs(save_dir_square, exist_ok=True)
     imgns = os.listdir(root_dir)
-    total_len = len(imgns)
     for imgn in tqdm.tqdm(imgns):
-        process_single_img_ipt(save_dir_visualize,save_dir_square,root_dir,imgn)
+        process_single_img_ipt(save_dir_visualize, save_dir_square,
+                               root_dir, imgn)
 
