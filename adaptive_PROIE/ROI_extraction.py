@@ -127,7 +127,7 @@ def process_single_img_ipt(save_dir_visualize,save_dir_square,root_dir,imgn):
 
 
 if __name__ == '__main__':
-    root_dir        = "/home/pai-ng/Jamal/MPDv2"  # output of Stage 1
+    root_dir        = "/CHSST/MPDv2_segmented/"  # output of Stage 1
     save_dir_visualize = "MPDv2_vis/"
     save_dir_square    = "/home/pai-ng/Jamal/MPDv2_ROI_FFARD"
     os.makedirs(save_dir_visualize, exist_ok=True)
