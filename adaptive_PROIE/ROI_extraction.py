@@ -2,7 +2,7 @@ import torch
 import time
 from torch.utils.data import DataLoader
 import torch.nn as nn
-from models import LAnet
+from LAnet import LAnet
 import os
 from torchvision import transforms
 from PIL import Image
