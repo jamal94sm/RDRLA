@@ -34,8 +34,8 @@ def process_one_img(rawpth,destpth,model,kpts,device="cuda"):
 
 def segfile():
     # ── EDIT THESE ────────────────────────────────────────────
-    SOURCE_DIR = "/path/to/MPDv2"
-    OUT_DIR    = "/path/to/MPDv2_segmented"
+    SOURCE_DIR = "/home/pai-ng/Jamal/MPDv2"
+    OUT_DIR    = "MPDv2_segmented/"
     CKPT       = "EP7-iou0.951562-pacc0.977916.pth"
     DEVICE     = "cuda"
     # ──────────────────────────────────────────────────────────
