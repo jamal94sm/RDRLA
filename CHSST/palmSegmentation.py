@@ -3,7 +3,7 @@ import torch
 import os
 import cv2
 import tqdm
-from CHSST.models.toptransformer.basemodel import Topformernet
+from models.toptransformer.basemodel import Topformernet
 
 def process_one_img(rawpth,destpth,model,kpts,device="cuda"):
     img = cv2.imread(rawpth)
