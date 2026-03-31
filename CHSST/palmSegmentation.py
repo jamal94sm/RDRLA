@@ -33,40 +33,45 @@ def process_one_img(rawpth,destpth,model,kpts,device="cuda"):
     return o
 
 def segfile():
-    sourcefile_list = [r"/data1/wx/palm/detection/data/MPD_RAW",]
-    
-    model = Topformernet().cuda()
-    model.load_state_dict(torch.load(r"CHSST_checkpoints\EP7-iou0.951562-pacc0.977916.pth"))
-    
-    for sourcefile in sourcefile_list:
-        out_file = r"/data1/wx/palm/detection/data/MPD/"
-        all_imgs = os.listdir(sourcefile)
-        needed_list = [i for i in all_imgs]#if int(i.split("_")[0])<=75]
-        count = 0
-        for img in tqdm.tqdm(needed_list):
-            raw_pth = os.path.join(sourcefile, img)
-            out_pth = os.path.join(out_file, img)
-            o = process_one_img(rawpth=raw_pth, destpth=out_pth, model=model, kpts=None)
-            h, w, _ = o.shape
-            w = int(w / 2)
-            p_img = o[:, :w].astype(np.uint8)
-            raw_label = o[:, w:].astype(np.uint8)
-            label = o[:, w:][:, :, 0].astype(np.uint8)
-            contours, _ = cv2.findContours(label.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-            m = 0;
-            m_area = 0
-            for i in range(len(contours)):
-                area = cv2.contourArea(contours[i])
-                if area > m_area:
-                    m = i;
-                    m_area = area
-            label = np.zeros((p_img.shape[0], w)).astype('uint8')
-            label = cv2.fillPoly(label, [contours[m]], 255)
-            label = cv2.cvtColor(label, cv2.COLOR_GRAY2RGB)
-            xs, ys = np.int0(np.min(contours[m].reshape(-1, 2), 0))
-            xe, ye = np.int0(np.max(contours[m].reshape(-1, 2), 0))
-            palm = cv2.bitwise_and(p_img, label)
-            palm = palm[ys:ye, xs:xe]
+    # ── EDIT THESE ────────────────────────────────────────────
+    SOURCE_DIR = "/path/to/MPDv2"
+    OUT_DIR    = "/path/to/MPDv2_segmented"
+    CKPT       = "EP7-iou0.951562-pacc0.977916.pth"
+    DEVICE     = "cuda"
+    # ──────────────────────────────────────────────────────────
+    os.makedirs(OUT_DIR, exist_ok=True)
+
+    # Full model was saved with torch.save(model, path)
+    model = torch.load(CKPT, map_location=DEVICE)
+    model.eval()
+
+    all_imgs = [f for f in os.listdir(SOURCE_DIR)
+                if f.lower().endswith(('.jpg','.jpeg','.png','.bmp'))]
+
+    for img_name in tqdm.tqdm(all_imgs):
+        raw_pth = os.path.join(SOURCE_DIR, img_name)
+        out_pth = os.path.join(OUT_DIR, img_name)
+        o = process_one_img(rawpth=raw_pth, destpth=out_pth,
+                            model=model, kpts=None, device=DEVICE)
+        h, w, _ = o.shape
+        w = w // 2
+        p_img    = o[:, :w].astype(np.uint8)
+        label    = o[:, w:][:, :, 0].astype(np.uint8)
+        contours, _ = cv2.findContours(label.copy(), cv2.RETR_EXTERNAL,
+                                       cv2.CHAIN_APPROX_NONE)
+        if not contours:
+            continue
+        best = max(contours, key=cv2.contourArea)
+        if cv2.contourArea(best) < 100:
+            continue
+        filled = np.zeros_like(label)
+        cv2.fillPoly(filled, [best], 255)
+        filled_3ch = cv2.cvtColor(filled, cv2.COLOR_GRAY2BGR)
+        palm = cv2.bitwise_and(p_img, filled_3ch)
+        xs, ys = np.int0(np.min(best.reshape(-1,2), 0))
+        xe, ye = np.int0(np.max(best.reshape(-1,2), 0))
+        palm = palm[ys:ye, xs:xe]
+        if palm.size > 0:
             cv2.imwrite(out_pth, palm)
 
 if __name__ == '__main__':
