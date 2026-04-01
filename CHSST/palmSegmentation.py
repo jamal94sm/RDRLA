@@ -35,8 +35,8 @@ def process_one_img(rawpth,destpth,model,kpts,device="cuda"):
 def segfile():
     # ── EDIT THESE ────────────────────────────────────────────
     SOURCE_DIR = "/home/pai-ng/Jamal/MPDv2"
-    OUT_DIR    = "MPDv2_segmented/"
-    CKPT       = "CHSST_checkpoints/EP7-iou0.951562-pacc0.977916_CHSST.pth"
+    OUT_DIR    = "/home/pai-ng/Jamal/MPDv2_segmented"
+    CKPT       = "CHSST/CHSST_checkpoints/EP7-iou0.951562-pacc0.977916_CHSST.pth"
     DEVICE     = "cuda"
     # ──────────────────────────────────────────────────────────
     os.makedirs(OUT_DIR, exist_ok=True)
