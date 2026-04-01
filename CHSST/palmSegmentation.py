@@ -36,7 +36,7 @@ def segfile():
     # ── EDIT THESE ────────────────────────────────────────────
     SOURCE_DIR = "/home/pai-ng/Jamal/MPDv2"
     OUT_DIR    = "MPDv2_segmented/"
-    CKPT       = "CHSST-checkpoints/EP7-iou0.951562-pacc0.977916.pth"
+    CKPT       = "CHSST_checkpoints/EP7-iou0.951562-pacc0.977916.pth"
     DEVICE     = "cuda"
     # ──────────────────────────────────────────────────────────
     os.makedirs(OUT_DIR, exist_ok=True)
