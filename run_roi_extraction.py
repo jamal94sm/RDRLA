@@ -404,7 +404,7 @@ def main():
 
     # ── Load LANet ───────────────────────────────────────────────
     print("Loading LANet ...")
-    lanet = LAnet().to(DEVICE)
+    lanet = LAnet(numclasses=4).to(DEVICE)
     # train_LANet.py saves as {"LANet": net.state_dict()}
     with open(LANET_CKPT, 'rb') as f:
         loaded_params = torch.load(f, map_location=DEVICE)
