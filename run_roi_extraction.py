@@ -392,7 +392,13 @@ def main():
     # ── Load CHSST segmentation model ───────────────────────────
     print("Loading CHSST segmentation model ...")
     # training.py saves with torch.save(fcn_model, path) — full model object
-    seg_model = torch.load(CHSST_CKPT, map_location=DEVICE)
+    from CHSST.models.toptransformer.seaformer import Seaformernet
+    seg_model = Seaformernet()
+    state_dict = torch.load(CHSST_CKPT, map_location=DEVICE)
+    # Strip 'module.' prefix if saved with DataParallel
+    state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
+    seg_model.load_state_dict(state_dict, strict=False)
+    seg_model.to(DEVICE)
     seg_model.eval()
     print("CHSST loaded.\n")
 
