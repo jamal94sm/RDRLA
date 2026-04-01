@@ -13,7 +13,7 @@ Place this file at the RDRLA repo root and run:
 #  CONFIG — edit these before running
 # ─────────────────────────────────────────────────────────────────
 MPD_RAW_DIR = "/home/pai-ng/Jamal/MPDv2"
-CHSST_CKPT  = "CHSST_checkpoints/EP7-iou0.951562-pacc0.977916_CHSST.pth"
+CHSST_CKPT  = "CHSST/CHSST_checkpoints/EP7-iou0.951562-pacc0.977916_CHSST.pth"
 LANET_CKPT  = "adaptive_PROIE/LANet_v1.pkl"
 SEG_OUT_DIR = "/home/pai-ng/Jamal/MPDv2_segmented"
 ROI_OUT_DIR = "/home/pai-ng/Jamal/MPDv2_ROI_FFARD"
