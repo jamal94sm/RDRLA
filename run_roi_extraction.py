@@ -8,7 +8,6 @@ Combines Stage 1 (CHSST hand segmentation) and Stage 2 (LANet alignment + ROI cr
 Place this file at the RDRLA repo root and run:
     python run_roi_extraction.py
 """
-
 # ─────────────────────────────────────────────────────────────────
 #  CONFIG — edit these before running
 # ─────────────────────────────────────────────────────────────────
