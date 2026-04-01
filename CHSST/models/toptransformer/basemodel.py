@@ -10,7 +10,7 @@ import warnings
 from mmcv.cnn import MODELS as MMCV_MODELS
 from mmcv.cnn.bricks.registry import ATTENTION as MMCV_ATTENTION
 from mmcv.utils import Registry
-from toptransformer.decodeHead import BaseDecodeHead
+from decodeHead import BaseDecodeHead
 from mmseg.ops import resize
 from mmseg.utils import get_root_logger
 from net.mobileface import GDC
