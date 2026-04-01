@@ -48,7 +48,7 @@ def segfile():
     all_imgs = [f for f in os.listdir(SOURCE_DIR)
                 if f.lower().endswith(('.jpg','.jpeg','.png','.bmp'))]
 
-    for img_name in tqdm.tqdm(all_imgs):
+    for img_name in tqdm.tqdm(all_imgs[:10]):
         raw_pth = os.path.join(SOURCE_DIR, img_name)
         out_pth = os.path.join(OUT_DIR, img_name)
         o = process_one_img(rawpth=raw_pth, destpth=out_pth,
