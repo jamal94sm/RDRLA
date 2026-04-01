@@ -42,7 +42,16 @@ def segfile():
     os.makedirs(OUT_DIR, exist_ok=True)
 
     # Full model was saved with torch.save(model, path)
-    model = torch.load(CKPT, map_location=DEVICE)
+    from models.toptransformer.seaformer import Seaformernet
+    model = Seaformernet()
+    state_dict = torch.load(CKPT, map_location=DEVICE)
+    # Handle both full-model saves and state-dict saves
+    if isinstance(state_dict, dict):
+        state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
+        model.load_state_dict(state_dict, strict=False)
+    else:
+        model = state_dict  # was a full model after all
+    model.to(DEVICE)
     model.eval()
 
     all_imgs = [f for f in os.listdir(SOURCE_DIR)
