@@ -461,7 +461,7 @@ def main():
 
     print(f"Found {total_imgs} images in {MPD_RAW_DIR}\n")
 
-    for idx, img_name in enumerate(raw_imgs, 1):
+    for idx, img_name in enumerate(raw_imgs[:10], 1):
         raw_pth   = os.path.join(MPD_RAW_DIR, img_name)
         base_name = os.path.splitext(img_name)[0]
         seg_pth   = os.path.join(SEG_OUT_DIR, img_name)
