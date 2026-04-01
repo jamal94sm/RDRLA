@@ -13,7 +13,7 @@ from mmcv.utils import Registry
 #from decodeHead import BaseDecodeHead
 from mmseg.ops import resize
 from mmseg.utils import get_root_logger
-from net.mobileface import GDC
+#from net.mobileface import GDC
 import torchsummary
 import torch
 import torchvision
@@ -26,6 +26,28 @@ import torch.nn as nn
 from mmcv.runner import BaseModule, auto_fp16, force_fp32
 from mmseg.core import build_pixel_sampler
 from mmseg.ops import resize
+
+
+class GDC(nn.Module):
+    def __init__(self, input_channel, embedding_size, ksize, need_activ=False):
+        super().__init__()
+        self.conv = nn.Conv2d(input_channel, input_channel, 
+                              ksize, groups=input_channel, bias=False)
+        self.bn = nn.BatchNorm2d(input_channel)
+        self.flatten = nn.Flatten()
+        self.linear = nn.Linear(input_channel, embedding_size)
+        self.need_activ = need_activ
+        if need_activ:
+            self.activ = nn.PReLU(embedding_size)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        x = self.flatten(x)
+        x = self.linear(x)
+        if self.need_activ:
+            x = self.activ(x)
+        return x
 
 
 
