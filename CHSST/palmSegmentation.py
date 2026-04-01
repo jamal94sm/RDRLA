@@ -77,8 +77,8 @@ def segfile():
         cv2.fillPoly(filled, [best], 255)
         filled_3ch = cv2.cvtColor(filled, cv2.COLOR_GRAY2BGR)
         palm = cv2.bitwise_and(p_img, filled_3ch)
-        xs, ys = np.int0(np.min(best.reshape(-1,2), 0))
-        xe, ye = np.int0(np.max(best.reshape(-1,2), 0))
+        xs, ys = np.intp(np.min(best.reshape(-1,2), 0))
+        xe, ye = np.intp(np.max(best.reshape(-1,2), 0))
         palm = palm[ys:ye, xs:xe]
         if palm.size > 0:
             cv2.imwrite(out_pth, palm)
