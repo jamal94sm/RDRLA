@@ -391,11 +391,9 @@ def main():
 
     # ── Load CHSST segmentation model ───────────────────────────
     print("Loading CHSST segmentation model ...")
-    # training.py saves with torch.save(fcn_model, path) — full model object
     from CHSST.models.toptransformer.seaformer import Seaformernet
     seg_model = Seaformernet()
     state_dict = torch.load(CHSST_CKPT, map_location=DEVICE)
-    # Strip 'module.' prefix if saved with DataParallel
     state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
     seg_model.load_state_dict(state_dict, strict=False)
     seg_model.to(DEVICE)
@@ -405,7 +403,6 @@ def main():
     # ── Load LANet ───────────────────────────────────────────────
     print("Loading LANet ...")
     lanet = LAnet(numclasses=4).to(DEVICE)
-    # train_LANet.py saves as {"LANet": net.state_dict()}
     with open(LANET_CKPT, 'rb') as f:
         loaded_params = torch.load(f, map_location=DEVICE)
     lanet.load_state_dict(loaded_params["LANet"])
@@ -418,55 +415,73 @@ def main():
         f for f in os.listdir(MPD_RAW_DIR)
         if os.path.splitext(f)[1].lower() in exts
     )
-    print(f"Found {len(raw_imgs)} images in {MPD_RAW_DIR}\n")
+    total_imgs = len(raw_imgs)
+    print(f"Found {total_imgs} images in {MPD_RAW_DIR}\n")
 
-    total_rois = 0
-    seg_fail   = 0
-    roi_fail   = 0
+    total_rois  = 0
+    seg_success = 0
+    seg_fail    = 0
+    roi_success = 0
+    roi_fail    = 0
 
-    for img_name in tqdm.tqdm(raw_imgs, desc="Extracting ROIs", unit="img"):
+    for idx, img_name in enumerate(raw_imgs, 1):
         raw_pth   = os.path.join(MPD_RAW_DIR, img_name)
         base_name = os.path.splitext(img_name)[0]
         seg_pth   = os.path.join(SEG_OUT_DIR, img_name)
 
+        # ── Progress header every 100 images ────────────────────
+        if idx % 100 == 0 or idx == 1:
+            print(f"\n[{idx}/{total_imgs}] "
+                  f"SEG ok={seg_success} fail={seg_fail} | "
+                  f"ROI ok={roi_success} fail={roi_fail} | "
+                  f"ROIs saved={total_rois}")
+
         # ── Stage 1: Segmentation ────────────────────────────────
+        print(f"  [{idx}/{total_imgs}] SEG  {img_name}", end=" ... ", flush=True)
         try:
             with torch.no_grad():
                 palm_seg = segment_one_image(raw_pth, seg_model, DEVICE)
         except Exception as e:
-            tqdm.tqdm.write(f"  [seg-error] {img_name}: {e}")
+            print(f"FAIL ({e})")
             seg_fail += 1
             continue
 
         if palm_seg is None:
-            tqdm.tqdm.write(f"  [seg-empty] {img_name}")
+            print("FAIL (empty mask)")
             seg_fail += 1
             continue
 
-        # Save intermediate segmented palm (mirrors palmSegmentation.py)
         cv2.imwrite(seg_pth, palm_seg)
+        seg_success += 1
+        print("OK")
 
-        # ── Stage 2: Alignment + ROI extraction ─────────────────
+        # ── Stage 2: ROI extraction ──────────────────────────────
+        print(f"  [{idx}/{total_imgs}] ROI  {img_name}", end=" ... ", flush=True)
         try:
             with torch.no_grad():
                 n = process_single_img(palm_seg, lanet, base_name,
                                        ROI_OUT_DIR, VIS_OUT_DIR)
         except Exception as e:
-            tqdm.tqdm.write(f"  [roi-error] {img_name}: {e}")
+            print(f"FAIL ({e})")
             roi_fail += 1
             continue
 
         if n == 0:
-            tqdm.tqdm.write(f"  [roi-empty] {img_name}")
+            print("FAIL (0 ROIs)")
             roi_fail += 1
-        total_rois += n
+        else:
+            roi_success += 1
+            total_rois  += n
+            print(f"OK ({n} ROIs)")
 
     print(f"\n{'─' * 52}")
-    print(f"  Input images   : {len(raw_imgs)}")
+    print(f"  Total images   : {total_imgs}")
+    print(f"  Seg success    : {seg_success}")
     print(f"  Seg failures   : {seg_fail}")
+    print(f"  ROI success    : {roi_success}")
     print(f"  ROI failures   : {roi_fail}")
-    print(f"  ROIs saved     : {total_rois}  "
-          f"(~{total_rois // max(1, len(raw_imgs) - seg_fail)} per image)")
+    print(f"  Total ROIs     : {total_rois}")
+    print(f"  (~{total_rois // max(1, roi_success)} ROIs per success)")
     print(f"  Seg output     : {SEG_OUT_DIR}")
     print(f"  ROI output     : {ROI_OUT_DIR}")
     print(f"{'─' * 52}")
